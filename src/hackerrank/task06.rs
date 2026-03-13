@@ -1,25 +1,39 @@
-pub fn kangaroo(x1: i32, v1: i32, x2: i32, v2: i32) -> String {
-    if v1 <= v2 {
-        return String::from("NO");
+use std::env;
+use std::fs::File;
+use std::io::{self, BufRead, Write};
+
+fn kangaroo(x1: i32, v1: i32, x2: i32, v2: i32) -> &'static str {
+    if v1 == v2 {
+        if x1 == x2 {
+            return "YES";
+        } else {
+            return "NO";
+        }
     }
 
-    if (x2 - x1) % (v1 - v2) == 0 {
-        String::from("YES")
+    let dx = x2 - x1;
+    let dv = v1 - v2;
+
+    if dv != 0 && dx % dv == 0 && dx / dv >= 0 {
+        "YES"
     } else {
-        String::from("NO")
+        "NO"
     }
 }
 
-#[test]
-fn test0() {
-    let real = kangaroo(0, 3, 4, 2);
-    let expected = String::from("YES");
-    assert_eq!(real, expected);
-}
+fn main() {
+    let stdin = io::stdin();
+    let mut stdin_iterator = stdin.lock().lines();
 
-#[test]
-fn test1() {
-    let real = kangaroo(0, 2, 5, 3);
-    let expected = String::from("NO");
-    assert_eq!(real, expected);
+    let mut fptr = File::create(env::var("OUTPUT_PATH").unwrap()).unwrap();
+
+    let line = stdin_iterator.next().unwrap().unwrap();
+    let parts: Vec<i32> = line
+        .trim()
+        .split_whitespace()
+        .map(|s| s.parse::<i32>().unwrap())
+        .collect();
+
+    let result = kangaroo(parts[0], parts[1], parts[2], parts[3]);
+    writeln!(fptr, "{}", result).ok();
 }
