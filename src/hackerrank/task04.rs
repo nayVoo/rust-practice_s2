@@ -1,33 +1,40 @@
-pub fn grading_students(grades: Vec<i32>) -> Vec<i32> {
-    grades
-        .into_iter()
-        .map(|grade| {
-            if grade < 38 {
-                grade
+use std::env;
+use std::fs::File;
+use std::io::{self, BufRead, Write};
+
+fn grading_students(grades: &[i32]) -> Vec<i32> {
+    grades.iter().map(|&g| {
+        if g < 38 {
+            g
+        } else {
+            let next_multiple_of_5 = ((g / 5) + 1) * 5;
+            if next_multiple_of_5 - g < 3 {
+                next_multiple_of_5
             } else {
-                let next_mult5 = ((grade / 5) + 1) * 5;
-                if next_mult5 - grade < 3 {
-                    next_mult5
-                } else {
-                    grade
-                }
+                g
             }
-        })
-        .collect()
+        }
+    }).collect()
 }
 
-#[cfg(test)]
-mod test {
-    use super::*;
+fn main() {
+    let stdin = io::stdin();
+    let mut stdin_iterator = stdin.lock().lines();
 
-    #[test]
-    fn test_grading_students() {
-        let input = vec![73, 67, 38, 33];
-        let expected = vec![75, 67, 40, 33];
-        assert_eq!(grading_students(input), expected);
+    let mut fptr = File::create(env::var("OUTPUT_PATH").unwrap()).unwrap();
 
-        let input2 = vec![84, 29, 57];
-        let expected2 = vec![85, 29, 57];
-        assert_eq!(grading_students(input2), expected2);
+    let n = stdin_iterator.next().unwrap().unwrap()
+        .trim().parse::<usize>().unwrap();
+
+    let mut grades = Vec::new();
+    for _ in 0..n {
+        let grade = stdin_iterator.next().unwrap().unwrap()
+            .trim().parse::<i32>().unwrap();
+        grades.push(grade);
+    }
+
+    let result = grading_students(&grades);
+    for g in result {
+        writeln!(fptr, "{}", g).ok();
     }
 }
